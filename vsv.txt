@@ -1,0 +1,60 @@
+import pyttsx3
+import speech_recognition as sr
+import datetime
+import wikipedia
+import pywhatkit
+
+# Initialize text-to-speech
+engine = pyttsx3.init()
+voices = engine.getProperty('voices')
+engine.setProperty('voice', voices[0].id)  # 0 for male, 1 for female
+
+def talk(text):
+    engine.say(text)
+    engine.runAndWait()
+
+def take_command():
+    listener = sr.Recognizer()
+    with sr.Microphone() as source:
+        print("🎤 Listening...")
+        listener.pause_threshold = 1
+        audio = listener.listen(source)
+    try:
+        print("🔍 Recognizing...")
+        command = listener.recognize_google(audio)
+        command = command.lower()
+        if 'jarvis' in command:
+            command = command.replace('jarvis', '').strip()
+    except:
+        return ""
+    return command
+
+def run_jarvis():
+    command = take_command()
+    print(f"🗣 Command: {command}")
+
+    if 'time' in command:
+        time = datetime.datetime.now().strftime('%I:%M %p')
+        talk(f"The time is {time}")
+
+    elif 'search' in command:
+        query = command.replace('search', '')
+        info = wikipedia.summary(query, sentences=2)
+        talk(info)
+
+    elif 'play' in command:
+        song = command.replace('play', '')
+        talk(f"Playing {song}")
+        pywhatkit.playonyt(song)
+
+    elif 'stop' in command:
+        talk("Goodbye sir!")
+        exit()
+
+    else:
+        talk("I did not understand. Please repeat.")
+
+# Main loop
+talk("Hello sir, I am Jarvis. How can I help you?")
+while True:
+    run_jarvis()
